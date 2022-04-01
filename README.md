@@ -1,1 +1,1 @@
-# Re-creating Odin-book Project
+# Vietnamese Big Two Web App
