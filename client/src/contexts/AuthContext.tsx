@@ -11,17 +11,6 @@ export const AuthContext = createContext<Props | null>(null);
 
 export const AuthProvider: FunctionComponent = ({ children }) => {
 	const [userData, setUserData] = useState<any | null>(null);
-	const { socket } = useContext(SocketContext)!;
-
-	useEffect(() => {
-		const userValue = localStorage.getItem('userData');
-		const localUserData = JSON.parse(userValue!);
-
-		if (localUserData != null) {
-			setUserData(localUserData);
-			socket.emit('user-login', localUserData.username);
-		}
-	}, []);
 
 	return (
 		<AuthContext.Provider value={{ userData, setUserData }}>

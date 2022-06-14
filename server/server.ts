@@ -1,5 +1,8 @@
 import { Request, Response, NextFunction } from 'express';
 import pool from './database';
+import { usersOnline, gameRooms } from './socket/data';
+const loginHandler = require('./socket/loginHandler');
+const roomHandler = require('./socket/roomHandler');
 
 const express = require('express');
 const app = express();
@@ -36,48 +39,16 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 
 app.use('/api/', indexRouter);
 
-const usersOnline: {
-	[username: string]: { temp_user: boolean; socketId: string };
-} = {};
-
 io.on('connection', (socket: any) => {
-	console.log('a user connected', socket.id);
+	loginHandler(io, socket);
+	roomHandler(io, socket);
 
 	socket.on('message', (msg: any) => {
 		console.log(msg);
 	});
 
-	socket.on('temp-user-login', async (username: string) => {
-		const query = await pool.query(
-			`SELECT * FROM users WHERE username = '${username}'`
-		);
-		if (query.rows.length == 0 && !usersOnline[username]) {
-			usersOnline[username] = { temp_user: true, socketId: socket.id };
-			io.to(socket.id).emit('username-available');
-		} else {
-			io.to(socket.id).emit(
-				'username-taken',
-				'Username has been taken. Please choose another one.'
-			);
-		}
-	});
-
-	socket.on('user-login', (username: string) => {
-		usersOnline[username] = { temp_user: false, socketId: socket.id };
-	});
-
 	socket.on('disconnect', () => {
-		console.log('Disconnect', socket.id);
-		for (const key in usersOnline) {
-			if (usersOnline[key].socketId === socket.id) {
-				delete usersOnline[key];
-			}
-		}
-		console.log(usersOnline);
-	});
-
-	socket.on('show-users', () => {
-		console.log(usersOnline);
+		delete usersOnline[socket.id];
 	});
 });
 

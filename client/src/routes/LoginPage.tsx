@@ -137,9 +137,10 @@ const LoginPage: FunctionComponent = () => {
 		socket.emit('temp-user-login', tempUsername.current!.value);
 	};
 
-	socket.on('username-available', () => {
+	socket.on('username-available', (username) => {
+		console.log(username);
 		setUserData({
-			username: tempUsername.current!.value,
+			username: username,
 			tempUser: true,
 			userId: null,
 			JWT: null,

@@ -18,9 +18,12 @@ exports.checkAuthentication = (
 		}
 
 		const decodedToken = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
-		req.userData = decodedToken.userId;
+		req.userData = {
+			userID: decodedToken.userId,
+			username: decodedToken.username,
+		};
 		next();
 	} catch (err) {
-		console.log(err);
+		res.status(404).json({ error: 'Authentication Failed.' });
 	}
 };

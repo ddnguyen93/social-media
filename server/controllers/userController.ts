@@ -1,5 +1,6 @@
 import pool from '../database';
 import { Request, Response } from 'express';
+import { UserAuthInfoRequest } from '../types/extendedTypes';
 const bcryptjs = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
@@ -54,7 +55,7 @@ exports.user_login = async function (req: Request, res: Response) {
 
 			if (passwordValid) {
 				const JWTtoken = jwt.sign(
-					{ userId: query.rows[0].user_id },
+					{ userId: query.rows[0].user_id, username: query.rows[0].username },
 					process.env.ACCESS_TOKEN_SECRET,
 					{ expiresIn: '24h' }
 				);
@@ -80,4 +81,11 @@ exports.user_login = async function (req: Request, res: Response) {
 			error: 'Error occured.',
 		});
 	}
+};
+
+exports.user_relogin = async function (
+	req: UserAuthInfoRequest,
+	res: Response
+) {
+	res.status(200).json(req.userData);
 };
